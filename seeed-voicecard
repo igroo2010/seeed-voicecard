@@ -30,7 +30,7 @@ modprobe i2c-dev
 dtparam spi=on
 sleep 1
 
-
+audioconfig=/home/pi/audiosetup
 
 is_1a=$(i2cdetect -y  1 0x1a 0x1a | grep 1a | awk '{print $2}')
 is_35=$(i2cdetect -y  1 0x35 0x35 | grep 35 | awk '{print $2}')
@@ -44,6 +44,12 @@ if [ "x${is_1a}" == "x1a" ] && [ "x${is_35}" == "x" ] ; then
     dtoverlay seeed-2mic-voicecard
     sleep 1
 
+    if [ -f $audioconfig ] ; then
+        sudo rm $audioconfig
+    fi
+
+    echo 'Respeaker-2-Mic' >> $audioconfig
+
     echo "create 2mic asound configure file"
     ln -s /etc/voicecard/asound_2mic.conf /etc/asound.conf
 
@@ -55,6 +61,15 @@ if [ "x${is_3b}" == "x3b" ] && [ "x${is_35}" == "x" ] ; then
     echo "install 4mic"
     dtoverlay seeed-4mic-voicecard
     sleep 1
+    
+    #Fore 3.5mm ('headphone') jack
+    amixer cset numid=3 1
+
+    if [ -f $audioconfig ] ; then
+        sudo rm $audioconfig
+    fi
+
+    echo 'Respeaker-4-Mic' >> $audioconfig
 
     echo "create 4mic asound configure file"
     ln -s /etc/voicecard/asound_4mic.conf /etc/asound.conf
@@ -78,6 +93,4 @@ fi
 alsactl restore
 
 #Fore 3.5mm ('headphone') jack
-amixer cset numid=3 1 
-
-
+amixer cset numid=3 1
